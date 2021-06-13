@@ -19,8 +19,12 @@ const addMessageForm = document.querySelector(select.addMessageForm);
 const userNameInput = document.querySelector(select.userNameInput);
 const messageContentInput = document.querySelector(select.messageContentInput);
 
-//global consts
+//WS
+const socket = io();
+//listen to messages from server and render
+socket.on('message', ({ author, content }) => addMessage(author, content));
 
+//global consts
 let userName = '';
 const messages = [];
 
@@ -33,6 +37,7 @@ const login = ()=>{
     userName = userNameInput.value;
     loginForm.classList.remove(classNames.show);
     messagesSection.classList.add(classNames.show);
+    socket.emit('join', { userName: userName });
   }else{
     alert('Please type username');
   }
@@ -43,11 +48,11 @@ loginForm.addEventListener('submit', (e)=>{
   login();
 });
 
-//msg function
+//client msg function
 const addMessage = (author, content)=>{
   const context = document.createElement('div');   
   const messageTemplate = 
-  `<li class="message message--received ${author == userName ? 'message--self' : ''}">
+  `<li class="message message--received ${author == userName ? 'message--self' : author == 'ChatBot' ? 'message--bot' : ''}">
     <h3 class="message__author">${author == userName ? 'You' : author}</h3>
     <div class="message__content">
       ${content}
@@ -61,9 +66,12 @@ const addMessage = (author, content)=>{
 addMessageForm.addEventListener('submit', (e)=>{
   e.preventDefault();
   if(messageContentInput.value){
-    addMessage(userName, messageContentInput.value);
+    const messageContent = messageContentInput.value;
+    addMessage(userName, messageContent);
+    socket.emit('message', { author: userName, content: messageContent });
     messageContentInput.value = '';
   }else{
     alert('Please type message');
   }  
 });
+
