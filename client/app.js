@@ -63,5 +63,7 @@ addMessageForm.addEventListener('submit', (e)=>{
   if(messageContentInput.value){
     addMessage(userName, messageContentInput.value);
     messageContentInput.value = '';
+  }else{
+    alert('Please type message');
   }  
 });
